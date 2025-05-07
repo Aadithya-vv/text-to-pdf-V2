@@ -1,3 +1,163 @@
+// Birthday data - replace with actual dates
+const birthdays = [
+  { name: "Aadithya", emoji: "🐱" },
+  { name: "Kishor", date: "03-25", emoji: "🐶" },
+  { name: "Arun", date: "05-09", emoji: "🦁" },
+  { name: "Dharakeshwar", date: "05-07", emoji: "🦊" },
+  { name: "Karthik", date: "09-24", emoji: "🐰" },
+  { name: "Baradhwaj", date: "10-28", emoji: "🐸" },
+  { name: "Ammu", date: "09-03", emoji: "🐥" },
+  { name: "Achu", date: "03-10", emoji: "🐯" },
+  { name: "Jameela", date: "03-03", emoji: "🐼" },
+  { name: "Lakshya", date: "10-09", emoji: "🐨" },
+  { name: "Meena", date: "10-29", emoji: "🐷" },
+  { name: "Krithiga", date: "06-10", emoji: "🐻" }
+];
+
+function checkBirthdays() {
+  const today = new Date();
+  const todayStr = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  
+  const birthdayPerson = birthdays.find(person => person.date === todayStr);
+  
+  if (birthdayPerson) {
+    showBirthdayBanner(birthdayPerson);
+    startSpecialEffects(birthdayPerson);
+  }
+}
+
+function showBirthdayBanner(person) {
+  const banner = document.createElement('div');
+  banner.className = 'birthday-banner';
+  banner.innerHTML = `
+    <span>🎉 Happy Birthday, ${person.name} ${person.emoji}! 🎉</span>
+    <button class="close-btn">✕</button>
+  `;
+  
+  document.body.insertBefore(banner, document.body.firstChild);
+  
+  const closeBtn = banner.querySelector('.close-btn');
+  closeBtn.addEventListener('click', () => {
+    banner.classList.add('fade-out');
+    setTimeout(() => banner.remove(), 400);
+    stopSpecialEffects();
+  });
+}
+
+function startSpecialEffects(person) {
+  // Start confetti
+  startConfetti();
+  
+  // Create floating emojis
+  createFloatingEmojis(person.emoji);
+  
+  // Create balloons
+  createBalloons();
+  
+  // Play birthday sound
+  playBirthdaySound();
+}
+
+function stopSpecialEffects() {
+  // Clear all animations
+  const floatingElements = document.querySelectorAll('.floating-emoji, .balloon');
+  floatingElements.forEach(el => el.remove());
+  
+  // Stop confetti if it's running
+  if (window.confetti) {
+    window.confetti.reset();
+  }
+}
+
+function createFloatingEmojis(emoji) {
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      const emojiElement = document.createElement('div');
+      emojiElement.className = 'floating-emoji';
+      emojiElement.textContent = emoji;
+      emojiElement.style.left = `${Math.random() * 100}vw`;
+      emojiElement.style.top = `${Math.random() * 100}vh`;
+      emojiElement.style.animationDelay = `${Math.random() * 5}s`;
+      emojiElement.style.fontSize = `${Math.random() * 2 + 1.5}rem`;
+      document.body.appendChild(emojiElement);
+    }, i * 300);
+  }
+}
+
+function createBalloons() {
+  const colors = ['#ff6b6b', '#48dbfb', '#1dd1a1', '#feca57', '#ff9ff3', '#5f27cd'];
+  
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+      balloon.style.left = `${Math.random() * 100}vw`;
+      balloon.style.background = colors[Math.floor(Math.random() * colors.length)];
+      balloon.style.animationDuration = `${10 + Math.random() * 10}s`;
+      document.body.appendChild(balloon);
+    }, i * 500);
+  }
+}
+
+function playBirthdaySound() {
+  const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-happy-birthday-to-you-2380.mp3');
+  audio.volume = 0.3;
+  audio.play().catch(e => console.log("Audio play failed:", e));
+}
+
+function startConfetti() {
+  // Enhanced confetti with different shapes and colors
+  const count = 200;
+  const defaults = {
+    origin: { y: 0.7 },
+    spread: 90,
+    ticks: 100,
+    gravity: 0.5,
+    decay: 0.94,
+    startVelocity: 25,
+    shapes: ['circle', 'square', 'star'],
+    colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
+  };
+
+  function fire(particleRatio, opts) {
+    confetti({
+      ...defaults,
+      ...opts,
+      particleCount: Math.floor(count * particleRatio)
+    });
+  }
+
+  fire(0.25, { spread: 26, startVelocity: 55 });
+  fire(0.2, { spread: 60 });
+  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+  fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+  fire(0.1, { spread: 120, startVelocity: 45 });
+  
+  // Keep firing confetti periodically
+  const interval = setInterval(() => {
+    fire(0.1, { spread: 60, startVelocity: 30 });
+  }, 3000);
+
+  // Store interval ID to clear later
+  window.confettiInterval = interval;
+}
+
+// Add this to your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+  checkBirthdays();
+  
+  // Add confetti canvas
+  const confettiCanvas = document.createElement('canvas');
+  confettiCanvas.id = 'confetti-canvas';
+  confettiCanvas.style.position = 'fixed';
+  confettiCanvas.style.top = '0';
+  confettiCanvas.style.left = '0';
+  confettiCanvas.style.width = '100%';
+  confettiCanvas.style.height = '100%';
+  confettiCanvas.style.pointerEvents = 'none';
+  confettiCanvas.style.zIndex = '1000';
+  document.body.appendChild(confettiCanvas);
+});
 document.addEventListener("DOMContentLoaded", function () {
   // =================== PDF CONVERTER CODE ===================
   if (document.getElementById('textInput') && document.getElementById('generatePdfBtn')) {
@@ -325,40 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     db.ref("sharedTasks").on("value", renderTasks);
   }
-  function sendMessage() {
-    const input = document.getElementById('chatbot-input');
-    const messages = document.getElementById('chatbot-messages');
-    const text = input.value.trim();
   
-    if (!text) return;
-  
-    // Show user's message
-    const userDiv = document.createElement('div');
-    userDiv.textContent = 'You: ' + text;
-    userDiv.style.marginBottom = '0.5rem';
-    messages.appendChild(userDiv);
-  
-    // Determine bot response
-    let reply = "Sorry, I didn't understand.";
-    const msg = text.toLowerCase();
-  
-    if (msg.includes("hello") || msg.includes("hi")) reply = "Hi! How can I help with your to-do list?";
-    else if (msg.includes("add")) reply = "To add a task, enter it above and click 'Add Task'.";
-    else if (msg.includes("date") || msg.includes("deadline")) reply = "You can set dates using the date pickers.";
-    else if (msg.includes("bye")) reply = "Bye! Don't forget your tasks!";
-  
-    const botDiv = document.createElement('div');
-    botDiv.textContent = 'Bot: ' + reply;
-    botDiv.style.marginBottom = '1rem';
-    botDiv.style.color = '#444';
-    messages.appendChild(botDiv);
-  
-    // Scroll to bottom
-    messages.scrollTop = messages.scrollHeight;
-  
-    // Clear input
-    input.value = '';
-  }
   
   
 });
